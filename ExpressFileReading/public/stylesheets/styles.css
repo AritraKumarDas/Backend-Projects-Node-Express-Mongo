@@ -1,0 +1,14 @@
+h1 {
+    color: red;
+}
+
+.tasks-container {
+    display: flex;
+    gap: 1rem;
+
+}
+
+.task {
+    padding: 10px;
+    background-color: beige;
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/stylesheets/styles.css">
+    <title>Home</title>
+</head>
+
+<body>
+    <h1>Welcome to home page</h1>
+    <form method="post" action="/create-task">
+
+        <input type="text" name="title" placeholder="title here" /><br />
+        <textarea name="details" id="details" cols="30" rows="10" placeholder="details here">
+
+        </textarea><br /><br />
+
+        <button type="submit">Create Task</button><br /><br />
+    </form>
+
+    <div class="tasks-container">
+
+        <% if (files.length> 0 ){ %>
+            <% files.forEach((file)=>{ %>
+                <div class="task">
+                    <h3>
+                        <%= file%>
+                    </h3>
+                    <a href="/task/<%=file%>">See details</a>
+                    <a href="/edit/<%=file%>">Edit</a>
+                </div>
+                <% }) } else{ %>
+                    <h3>No tasks available</h3>
+                    <% } %>
+
+
+    </div>
+
+
+
+</body>
+
+</html>
