@@ -13,10 +13,53 @@
 
     <h2>Welcome <%= username %>
     </h2>
-    <h2>Email ID: <%= email %>
-    </h2>
-    <h2>Age: <%= age %>
-    </h2>
+
+    <h3>Create New Post</h3>
+    <form action="/create" method="post">
+        <textarea name="postData" placeholder="what's on your mind..."></textarea>
+        <button type="submit">Create Post</button>
+    </form>
+
+    <div>
+        <h3>Posts</h3>
+        <div class="post-container">
+
+            <% if(posts.length==0){ %>
+                <h4>No Posts</h4>
+                <% }else{ %>
+                    <% posts.forEach((post)=>{ %>
+                        <div class="post">
+                            <h4>@
+                                <%=username%>
+                            </h4>
+                            <p>
+                                <%=post.postData%>
+                            </p>
+                            <span>
+                                <%=post.likes.length%> likes
+                            </span>
+                            <div class="flex">
+                                <a href="/post/like/<%=post._id%>">
+                                    <%=post.likes.includes(_id)?'Unlike':'Like'%>
+                                </a>
+                                <a href="/post/edit/<%=post._id%>">Edit </a>
+                                </a>
+                                <a href="/post/delete/<%=post._id%>">Delete </a>
+                            </div>
+
+
+                            <% }) %>
+                                <% } %>
+
+
+
+
+
+                        </div>
+
+        </div>
+
+    </div>
 
 </body>
 

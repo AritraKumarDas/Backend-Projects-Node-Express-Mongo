@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h2>Edit Post</h2>
+    <form action="/post/update/<%=post._id%>" method="post">
+        <textarea name="postData" id=""><%=post.postData%></textarea>
+        <button type="submit">Update</button>
+    </form>
+
+</body>
+
+</html>

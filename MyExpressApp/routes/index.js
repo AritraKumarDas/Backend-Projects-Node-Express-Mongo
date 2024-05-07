@@ -12,6 +12,9 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+router.get("/user/:id([0-9]{4})", (req, res) => {
+  res.send({ id: req.params.id })
+})
 
 router.get("/create", async function (req, res, next) {
   const createdUser = await userModel.create({

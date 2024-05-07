@@ -31,20 +31,21 @@ app.post("/register", async (req, res) => {
 
     const user = await userModel.findOne({ email })
 
+
     if (user) {
         return res.send("Email Id already registered")
     }
 
     bcrypt.genSalt(10, function (err, salt) {
         bcrypt.hash(password, salt, async function (err, hash) {
-            console.log("came here")
+
             const createdUser = await userModel.create({
                 username,
                 email,
                 password: hash,
                 age
             })
-            console.log("created user => ", createdUser)
+
             const token = jwt.sign({ email: createdUser.email }, 'shhhhh');
             res.cookie('token', token)
             res.redirect("/login");
@@ -70,6 +71,7 @@ app.post('/login', async (req, res) => {
     const fetchedUser = await userModel.findOne({ email })
     if (!fetchedUser) {
         res.send("Email not found!")
+        return;
     }
     bcrypt.compare(password, fetchedUser.password, function (err, result) {
         if (!result) {
@@ -84,25 +86,64 @@ app.post('/login', async (req, res) => {
 
 app.get("/profile", isLoggedIn, async (req, res) => {
 
-    const fetchedUser = await userModel.findOne({ email: req.data.email })
-    console.log(fetchedUser);
+    const fetchedUser = await userModel.findOne({ email: req.data.email }).populate("posts")
+    // console.log(fetchedUser);
 
     res.render("profile", fetchedUser);
 })
 
-app.get("/post/create", async (req, res) => {
-
+app.post("/create", isLoggedIn, async (req, res) => {
+    const { postData } = req.body;
+    const loggedInUser = await userModel.findOne({ email: req.data.email })
     const createdPost = await postModel.create({
-        postData: "hey there what's up!",
-        user: '66348ab837a695612345808f'
+        postData,
+        user: loggedInUser._id,
     })
 
-    const fetchedUser = await userModel.findOne({ _id: '66348ab837a695612345808f' })
-    fetchedUser.posts.push(createdPost._id);
-    await fetchedUser.save()
+    loggedInUser.posts.push(createdPost._id);
+    await loggedInUser.save();
+    res.redirect("/profile")
 
-    res.send({ createdPost, fetchedUser });
 
+})
+
+app.get("/post/like/:id", isLoggedIn, async (req, res) => {
+    console.log("got to like...")
+    const postId = req.params.id;
+    const post = await postModel.findOne({ _id: postId });
+    const loggedInUser = await userModel.findOne({ email: req.data.email });
+    if (post.likes.indexOf(loggedInUser._id) === -1) {
+        post.likes.push(loggedInUser._id);
+    } else {
+        post.likes.splice(post.likes.indexOf(loggedInUser._id), 1);
+    }
+    await post.save();
+    res.redirect("/profile");
+
+})
+
+app.get("/post/edit/:id", isLoggedIn, async (req, res) => {
+    const postId = req.params.id;
+    const post = await postModel.findOne({ _id: postId });
+
+    res.render("edit", { post: post })
+})
+
+app.post("/post/update/:id", isLoggedIn, async (req, res) => {
+    const postId = req.params.id;
+    const post = await postModel.findOneAndUpdate({ _id: postId }, { postData: req.body.postData });
+    res.redirect("/profile")
+
+})
+
+app.get("/post/delete/:id", isLoggedIn, async (req, res) => {
+    const postId = req.params.id;
+    const post = await postModel.deleteOne({ _id: postId })
+    console.log(post)
+    const user = await userModel.findOne({ email: req.data.email })
+    user.posts.splice(user.posts.indexOf(postId), 1)
+    await user.save()
+    res.redirect("/profile");
 })
 
 app.get("/logout", (req, res) => {
@@ -111,10 +152,14 @@ app.get("/logout", (req, res) => {
     res.render("logout");
 })
 
-// Middleware
-async function isLoggedIn(req, res, next) {
+app.get("*", (req, res) => {
+    res.send("Page not found")
+})
 
-    if (req.cookies.token === '') {
+// Middleware
+function isLoggedIn(req, res, next) {
+
+    if ((!req.cookies.token) || (req.cookies.token === '')) {
         if (req.url == "/login") {
             next();
         } else {
@@ -123,8 +168,7 @@ async function isLoggedIn(req, res, next) {
 
     } else {
         const decodedToken = jwt.verify(req.cookies.token, 'shhhhh');
-        console.log("decoded token => ", decodedToken)
-        // const loggedInUser = await userModel.findOne({ email: decodedToken.email })
+        // console.log("decoded token => ", decodedToken)
         req.data = decodedToken;
         next();
     }
