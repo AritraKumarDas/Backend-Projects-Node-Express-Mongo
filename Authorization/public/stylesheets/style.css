@@ -11,3 +11,11 @@ h1 {
     display: flex;
     gap: 1rem;
 }
+
+.profile-image {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    /* background-color: blueviolet; */
+}
